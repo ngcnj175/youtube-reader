@@ -1,0 +1,1120 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YouTubeコメント読み上げくん</title>
+    <link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@400;500;700&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #FFB300;
+            /* Amber/Orange */
+            --primary-light: #FFECB3;
+            --secondary-color: #546E7A;
+            --background-color: #FFFDF5;
+            /* Very light cream/yellow tint */
+            --card-color: #FFFFFF;
+            --text-color: #424242;
+            --accent-color: #FF6F00;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Zen Maru Gothic', sans-serif;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        .url-input-container {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            width: 100%;
+        }
+
+        .url-input {
+            flex-grow: 1;
+            /* existing styles will apply */
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding: 20px;
+        }
+
+        .header h1 {
+            font-size: 2.2rem;
+            color: var(--text-color);
+            margin-bottom: 10px;
+            letter-spacing: 0.05em;
+        }
+
+        .header h1 span {
+            display: block;
+            font-size: 1.5rem;
+            color: var(--secondary-color);
+            margin-bottom: 5px;
+            font-weight: 500;
+        }
+
+        .header p {
+            font-size: 1rem;
+            color: #78909C;
+        }
+
+        .input-section {
+            background: var(--card-color);
+            padding: 40px;
+            border-radius: 30px;
+            box-shadow: 0 8px 24px rgba(255, 179, 0, 0.15);
+            /* Soft orange shadow */
+            margin-bottom: 40px;
+            text-align: center;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: 700;
+            color: var(--secondary-color);
+            font-size: 1.1rem;
+        }
+
+        .url-input {
+            width: 100%;
+            padding: 18px 25px;
+            border: 2px solid #E0E0E0;
+            border-radius: 50px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            outline: none;
+            background: #FAFAFA;
+            font-family: inherit;
+        }
+
+        .url-input:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 4px rgba(255, 179, 0, 0.2);
+            background: #FFF;
+        }
+
+        .controls {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            margin-top: 30px;
+            align-items: center;
+        }
+
+        .buttons-row {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            width: 100%;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 14px 30px;
+            border: none;
+            border-radius: 50px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-weight: 700;
+            font-family: inherit;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: var(--primary-color);
+            color: #FFF;
+        }
+
+        .btn-primary:hover {
+            background: var(--accent-color);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(255, 111, 0, 0.3);
+        }
+
+        .btn-secondary {
+            background: #ECEFF1;
+            color: var(--secondary-color);
+        }
+
+        .btn-secondary:hover {
+            background: #CFD8DC;
+            transform: translateY(-2px);
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none !important;
+            box-shadow: none;
+        }
+
+        .settings-panel {
+            background: #FFF8E1;
+            /* Light yellow bg for settings */
+            padding: 25px;
+            border-radius: 20px;
+            width: 100%;
+            margin-top: 20px;
+        }
+
+        .control-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .control-row:last-child {
+            margin-bottom: 0;
+        }
+
+        .control-item {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 5px;
+        }
+
+        .control-item label {
+            font-size: 0.9rem;
+            color: var(--secondary-color);
+            font-weight: 700;
+        }
+
+        select {
+            padding: 10px 20px;
+            border-radius: 12px;
+            border: 2px solid #FFECB3;
+            font-family: inherit;
+            font-size: 14px;
+            background: #FFF;
+            color: var(--text-color);
+            cursor: pointer;
+            outline: none;
+        }
+
+        select:focus {
+            border-color: var(--primary-color);
+        }
+
+        .speed-control {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: #FFF;
+            padding: 8px 15px;
+            border-radius: 50px;
+            border: 2px solid #FFECB3;
+        }
+
+        /* Toggle Switch Styles */
+        .toggle-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: #FFF;
+            padding: 8px 15px;
+            border-radius: 50px;
+            border: 2px solid #FFECB3;
+        }
+
+        .toggle-label {
+            font-size: 0.9rem;
+            font-weight: 700;
+            color: var(--secondary-color);
+        }
+
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 44px;
+            height: 24px;
+        }
+
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #CFD8DC;
+            transition: .4s;
+            border-radius: 24px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 18px;
+            width: 18px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+        }
+
+        input:checked+.slider {
+            background-color: var(--primary-color);
+        }
+
+        input:checked+.slider:before {
+            transform: translateX(20px);
+        }
+
+        .status-text {
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            min-width: 30px;
+        }
+
+        .comments-section {
+            background: transparent;
+            margin-top: 40px;
+        }
+
+        .comments-header {
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .comments-header h2 {
+            font-size: 1.5rem;
+            color: var(--text-color);
+        }
+
+        .comments-list {
+            display: grid;
+            gap: 15px;
+        }
+
+        .comment-item {
+            background: #FFF;
+            padding: 25px;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: 2px solid transparent;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.02);
+            position: relative;
+        }
+
+        .comment-item:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.05);
+            border-color: var(--primary-light);
+        }
+
+        .comment-item.active {
+            background: #FFF8E1;
+            border-color: var(--primary-color);
+            box-shadow: 0 8px 20px rgba(255, 179, 0, 0.2);
+        }
+
+        .comment-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid #F5F5F5;
+        }
+
+        .comment-author {
+            font-weight: 700;
+            font-size: 1rem;
+            color: var(--secondary-color);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .comment-number {
+            background: var(--primary-color);
+            color: white;
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 0.8rem;
+        }
+
+        .comment-date {
+            font-size: 0.85rem;
+            color: #90A4AE;
+        }
+
+        .comment-text {
+            font-size: 1.05rem;
+            line-height: 1.7;
+            color: #37474F;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: var(--secondary-color);
+            font-weight: bold;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 10px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #CFD8DC;
+            border-radius: 5px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #B0BEC5;
+        }
+
+        /* Mobile Adjustments */
+        @media (max-width: 600px) {
+            .header h1 {
+                font-size: 1.8rem;
+            }
+
+            .input-section {
+                padding: 25px;
+            }
+
+            .btn {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .control-row {
+                flex-direction: column;
+                width: 100%;
+            }
+
+            .toggle-container,
+            .speed-control,
+            .control-item select {
+                width: 100%;
+                justify-content: space-between;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="header">
+            <h1><span>YouTubeコメント読み上げサービス</span>「みんなの声」</h1>
+            <p>動画のURLを入力して、みんなの反応を聴いてみよう</p>
+        </div>
+
+        <div class="input-section">
+            <div class="input-group">
+                <!-- Label removed for simpler look, using placeholder -->
+                <input type="text" id="videoUrl" class="url-input"
+                    placeholder="YouTubeのURLをここに貼り付け (例: https://youtu.be/...)">
+            </div>
+
+            <div class="controls">
+                <div class="buttons-row">
+                    <button id="fetchBtn" class="btn btn-primary"><span style="font-size: 1.2rem;">📥</span>
+                        コメントを取得</button>
+                    <button id="translateBtn" class="btn btn-primary" style="background: var(--secondary-color);">🌐
+                        一括翻訳</button>
+                    <button id="playBtn" class="btn btn-secondary" disabled>▶️ 再生</button>
+                    <button id="stopBtn" class="btn btn-secondary" disabled>⏹️ 停止</button>
+                </div>
+
+                <div class="settings-panel">
+                    <div class="control-row">
+                        <div class="control-item">
+                            <label>読み上げ速度</label>
+                            <div class="speed-control">
+                                <input type="range" id="speedSlider" class="speed-slider" min="0.5" max="2" step="0.1"
+                                    value="1">
+                                <span id="speedValue"
+                                    style="font-weight: bold; min-width: 40px; text-align: right;">1.0x</span>
+                            </div>
+                        </div>
+
+                        <div class="control-item">
+                            <label>並び順</label>
+                            <select id="sortOrder">
+                                <option value="relevance">🔥 おすすめ順</option>
+                                <option value="time">🆕 新しい順</option>
+                                <option value="oldest">🕰️ 古い順</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="control-row">
+                        <div class="toggle-container">
+                            <span class="toggle-label">自動スクロール</span>
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="autoScrollToggle">
+                                <span class="slider"></span>
+                            </label>
+                            <span id="autoScrollStatus" class="status-text">OFF</span>
+                        </div>
+
+                        <div class="toggle-container">
+                            <span class="toggle-label">ナンバリング</span>
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="numberingToggle" checked>
+                                <span class="slider"></span>
+                            </label>
+                            <span id="numberingStatus" class="status-text">ON</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="comments-section" id="commentsSection" style="display: none;">
+            <div class="comments-header">
+                <h2>� 取得したコメント (<span id="commentCount">0</span>件)</h2>
+            </div>
+            <div id="commentsList" class="comments-list"></div>
+        </div>
+
+        <div id="loadingDiv" class="loading" style="display: none;">
+            コメントを取得中...
+        </div>
+
+        <div id="statusDiv"></div>
+    </div>
+
+    <script>
+        class YouTubeCommentReader {
+            constructor() {
+                this.comments = [];
+                this.currentIndex = -1;
+                this.isReading = false;
+                this.synth = window.speechSynthesis;
+                this.currentUtterance = null;
+
+                // 設定値
+                this.voicePattern = 'auto';
+                this.sortOrder = 'relevance'; // relevance, time, oldest
+                this.autoScroll = false;
+                this.showNumbering = true;
+
+                // Pagination state
+                this.MAX_COMMENTS = 1000;
+                this.commentsBuffer = [];
+
+                // Voice / Translation state
+                this.voiceMode = 'normal'; // 'normal', 'high', 'low', 'random'
+                this.availableVoices = [];
+                this.voiceTypes = {
+                    female: null,
+                    male: null,
+                    neutral: null
+                };
+                this.currentAudio = null; // Unused but kept for safety in stopReading cleanup
+
+                this.initEventListeners();
+                this.updateSpeedDisplay();
+                this.loadVoices();
+
+                if (speechSynthesis.onvoiceschanged !== undefined) {
+                    speechSynthesis.onvoiceschanged = () => this.loadVoices();
+                }
+            }
+
+            loadVoices() {
+                this.availableVoices = speechSynthesis.getVoices();
+                console.log('🎭 利用可能な音声:', this.availableVoices.length);
+
+                const japaneseVoices = this.availableVoices.filter(voice =>
+                    voice.lang.includes('ja') || voice.lang.includes('JP')
+                );
+
+                if (japaneseVoices.length > 0) {
+                    this.voiceTypes.female = japaneseVoices.find(voice =>
+                        voice.name.includes('Female') ||
+                        voice.name.includes('女性') ||
+                        voice.name.includes('Kyoko') ||
+                        voice.name.includes('Otoya')
+                    ) || japaneseVoices[0];
+
+                    this.voiceTypes.male = japaneseVoices.find(voice =>
+                        voice.name.includes('Male') ||
+                        voice.name.includes('男性') ||
+                        voice.name.includes('Takeshi')
+                    ) || japaneseVoices[Math.min(1, japaneseVoices.length - 1)];
+
+                    this.voiceTypes.neutral = japaneseVoices[Math.min(2, japaneseVoices.length - 1)] || japaneseVoices[0];
+                } else {
+                    this.voiceTypes.female = this.availableVoices[0] || null;
+                    this.voiceTypes.male = this.availableVoices[1] || null;
+                    this.voiceTypes.neutral = this.availableVoices[2] || null;
+                }
+            }
+
+            initEventListeners() {
+                document.getElementById('fetchBtn').addEventListener('click', () => this.fetchComments());
+                document.getElementById('translateBtn').addEventListener('click', () => this.translateAllComments());
+                document.getElementById('playBtn').addEventListener('click', () => this.startReading());
+                document.getElementById('stopBtn').addEventListener('click', () => this.stopReading());
+                document.getElementById('speedSlider').addEventListener('input', () => this.updateSpeedDisplay());
+
+                document.getElementById('sortOrder').addEventListener('change', (e) => {
+                    this.sortOrder = e.target.value;
+                    if (document.getElementById('videoUrl').value) {
+                        // Sort and refresh display if data exists
+                        // But usually we just re-display. The simplified logic calls fetch or sortAndDisplay.
+                        // Let's stick to safe simple re-sort.
+                        this.sortAndDisplayComments();
+                    }
+                });
+
+                document.getElementById('numberingToggle').addEventListener('change', (e) => {
+                    this.showNumbering = e.target.checked;
+                    document.getElementById('numberingStatus').innerText = this.showNumbering ? 'ON' : 'OFF';
+                    this.displayComments();
+                });
+
+                document.getElementById('autoScrollToggle').addEventListener('change', (e) => {
+                    this.autoScroll = e.target.checked;
+                    document.getElementById('autoScrollStatus').innerText = this.autoScroll ? 'ON' : 'OFF';
+                });
+
+                document.getElementById('videoUrl').addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') this.fetchComments();
+                });
+            }
+
+            updateSpeedDisplay() {
+                const slider = document.getElementById('speedSlider');
+                document.getElementById('speedValue').textContent = `${slider.value}x`;
+            }
+
+            extractVideoId(url) {
+                const patterns = [
+                    /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([^&\n?#]+)/,
+                    /youtube\.com\/v\/([^&\n?#]+)/
+                ];
+
+                for (const pattern of patterns) {
+                    const match = url.match(pattern);
+                    if (match) return match[1];
+                }
+                return null;
+            }
+
+            async fetchComments() {
+                console.log('📞 コメント取得が呼び出されました');
+                const url = document.getElementById('videoUrl').value.trim();
+                console.log('🔗 入力されたURL:', url);
+
+                if (!url) {
+                    this.showError('YouTubeのURLを入力してください');
+                    return;
+                }
+
+                const videoId = this.extractVideoId(url);
+                console.log('🆔 抽出されたVideoID:', videoId);
+
+                if (!videoId) {
+                    this.showError('有効なYouTubeのURLを入力してください');
+                    return;
+                }
+
+                this.showLoading(true);
+                this.clearStatus();
+
+                // 🔐 Cloudflare Workerのエンドポイント
+                // ローカル開発用: http://localhost:8787
+                // 本番デプロイ後: https://youtube-comment-reader-worker.<your-subdomain>.workers.dev
+                const WORKER_URL = 'https://youtube-comment-reader-worker.ngcnj175.workers.dev';
+                // TODO: Replace with your actual YouTube Data API Key if not using a worker
+                const YOUTUBE_API_KEY = 'YOUR_YOUTUBE_DATA_API_KEY';
+
+                try {
+                    console.log('🌐 実際のAPI呼び出し開始 (via Worker)');
+
+                    // Call fetch with pagination logic
+                    const comments = await this.fetchAllComments(videoId, WORKER_URL);
+
+                    this.comments = comments;
+                    this.displayComments();
+                    this.showLoading(false);
+                    this.showStatus(`${comments.length}件のコメントを取得しました！`);
+                } catch (error) {
+                    console.error('❌ API呼び出しエラー:', error);
+                    this.showLoading(false);
+                    this.showError(`コメントの取得に失敗しました: ${error.message}`);
+
+                    // エラー時はデモモードで動作
+                    console.log('🧪 エラーのためデモモードに切り替え');
+                    this.runDemoMode();
+                }
+            }
+
+            runDemoMode() {
+                const sampleComments = [
+                    { author: '太郎', text: 'この動画すごく面白いです！' },
+                    { author: '花子', text: 'ありがとうございます、勉強になりました。' },
+                    { author: 'ユーザー123', text: 'わかりやすい説明ですね～' },
+                    { author: '山田', text: '素晴らしい内容でした！' },
+                    { author: 'コメンター', text: 'また見に来ます。' },
+                    { author: '視聴者A', text: 'おつかれさまでした！' },
+                    { author: 'ファン', text: 'いつも楽しみにしています。' },
+                    { author: '学習者', text: 'とても参考になります。' }
+                ];
+
+                setTimeout(() => {
+                    console.log('✅ デモコメント表示開始');
+                    this.comments = sampleComments;
+                    this.displayComments();
+                    this.showLoading(false);
+                    this.showApiStatus('現在デモモード(またはWorker接続エラー)で動作中です。Workerが起動しているか、URLが正しいか確認してください。');
+                }, 1500);
+            }
+
+            async fetchAllComments(videoId, workerUrl) {
+                let allComments = [];
+                let nextPageToken = '';
+                let fetchCount = 0;
+                const maxFetches = 10; // 100 items * 10 = 1000 items max
+
+                // Decide API sort order: 'oldest' needs 'time' sort from API, then reverse client-side
+                let apiSortOrder = this.sortOrder === 'oldest' ? 'time' : this.sortOrder;
+
+                this.showLoading(true);
+
+                try {
+                    do {
+                        const data = await this.fetchPage(videoId, workerUrl, apiSortOrder, nextPageToken);
+
+                        if (!data.items) break;
+
+                        const extracted = data.items.map(item => ({
+                            author: item.snippet.topLevelComment.snippet.authorDisplayName,
+                            text: item.snippet.topLevelComment.snippet.textDisplay.replace(/<[^>]*>/g, ''),
+                            publishedAt: item.snippet.topLevelComment.snippet.publishedAt
+                        }));
+
+                        allComments = allComments.concat(extracted);
+                        nextPageToken = data.nextPageToken;
+                        fetchCount++;
+
+                        // Update loading status with progress
+                        document.getElementById('loadingDiv').innerText = `コメントを取得中... (${allComments.length}件)`;
+
+                    } while (nextPageToken && allComments.length < this.MAX_COMMENTS && fetchCount < maxFetches);
+
+                    // If 'oldest' sort, reverse the array
+                    if (this.sortOrder === 'oldest') {
+                        allComments.reverse();
+                    }
+
+                    return allComments;
+
+                } catch (error) {
+                    console.error('Fetch loop error:', error);
+                    throw error;
+                }
+            }
+
+            async fetchPage(videoId, workerUrl, order, pageToken) {
+                // Cloudflare Workerへリクエスト (maxResults=100)
+                const apiUrl = `${workerUrl}?videoId=${videoId}&order=${order}&pageToken=${pageToken}&maxResults=100`;
+                // Google API Direct: 
+                // const apiUrl = `https://www.googleapis.com/youtube/v3/commentThreads?part=snippet&videoId=${videoId}&key=${workerUrl}&maxResults=100&order=${order}&pageToken=${pageToken}`;
+
+                const response = await fetch(apiUrl);
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    throw new Error(`API Error (${response.status}): ${errorText}`);
+                }
+                return await response.json();
+            }
+
+            // Legacy method kept for reference or single fetch if needed
+            async fetchYouTubeComments(videoId, apiKeyOrWorkerUrl) {
+                return this.fetchAllComments(videoId, apiKeyOrWorkerUrl);
+            }
+
+            displayComments() {
+                const commentsList = document.getElementById('commentsList');
+                const commentsSection = document.getElementById('commentsSection');
+
+                commentsList.innerHTML = '';
+
+                this.comments.forEach((comment, index) => {
+                    const commentDiv = document.createElement('div');
+                    commentDiv.className = 'comment-item';
+
+                    const numberStr = this.showNumbering ? `<span style="font-weight: bold; color: #666; margin-right: 8px;">#${index + 1}</span>` : '';
+
+                    // Simple Moment-like date formatting without library if we want to be safe, 
+                    // or restore Moment if it was there? 
+                    // Previous code used `moment` in Step 596, but I removed it in Step 605.
+                    // The user wants "Previous Spec". Step 583 state used standard numbering.
+                    // Let's us standard Date formatting to be safe and clean.
+                    const dateStr = new Date(comment.publishedAt).toLocaleString('ja-JP', {
+                        year: 'numeric', month: '2-digit', day: '2-digit',
+                        hour: '2-digit', minute: '2-digit'
+                    });
+
+                    commentDiv.innerHTML = `
+                        <div class="comment-header">
+                            <span class="comment-author">${numberStr} ${this.escapeHtml(comment.author)}</span>
+                            <span class="comment-date">${dateStr}</span>
+                        </div>
+                        <div class="comment-text">${this.escapeHtml(comment.text)}</div>
+                    `;
+
+                    commentDiv.addEventListener('click', () => {
+                        this.startReadingFromIndex(index);
+                    });
+
+                    commentsList.appendChild(commentDiv);
+                });
+
+                document.getElementById('commentCount').textContent = this.comments.length;
+                commentsSection.style.display = 'block';
+                document.getElementById('playBtn').disabled = false;
+            }
+
+            escapeHtml(text) {
+                const div = document.createElement('div');
+                div.textContent = text;
+                return div.innerHTML;
+            }
+
+            formatDate(isoString) {
+                if (!isoString) return '';
+                const date = new Date(isoString);
+                return date.toLocaleString('ja-JP', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric',
+                    hour: 'numeric',
+                    minute: 'numeric'
+                });
+            }
+
+            startReading() {
+                if (this.comments.length === 0) return;
+                this.startReadingFromIndex(0);
+            }
+
+            startReadingFromIndex(index) {
+                this.stopReading();
+                this.currentIndex = index;
+                this.isReading = true;
+                this.readCurrentComment();
+
+                document.getElementById('playBtn').disabled = true;
+                document.getElementById('stopBtn').disabled = false;
+            }
+
+            readCurrentComment() {
+                if (this.currentIndex >= this.comments.length || !this.isReading) {
+                    this.stopReading();
+                    return;
+                }
+
+                // 前のコメントのハイライトを削除
+                document.querySelectorAll('.comment-item').forEach(item => {
+                    item.classList.remove('active');
+                });
+
+                // 現在のコメントをハイライト
+                const commentItems = document.querySelectorAll('.comment-item');
+                if (commentItems[this.currentIndex]) {
+                    commentItems[this.currentIndex].classList.add('active');
+
+                    if (this.autoScroll) {
+                        commentItems[this.currentIndex].scrollIntoView({
+                            behavior: 'smooth',
+                            block: 'center'
+                        });
+                    }
+                }
+
+                const comment = this.comments[this.currentIndex];
+                const text = comment.text;
+
+                // Browser TTS
+                const utterance = new SpeechSynthesisUtterance(text);
+                this.currentUtterance = utterance;
+
+                // Assign type based on index (Auto/Random effect)
+                const types = ['female', 'male', 'neutral'];
+                const voiceType = types[this.currentIndex % 3];
+                const selectedVoice = this.voiceTypes[voiceType];
+
+                if (selectedVoice) {
+                    utterance.voice = selectedVoice;
+                }
+
+                utterance.lang = 'ja-JP';
+                utterance.rate = parseFloat(document.getElementById('speedSlider').value);
+                utterance.volume = 1;
+
+                switch (voiceType) {
+                    case 'female':
+                        utterance.pitch = 1.2;
+                        break;
+                    case 'male':
+                        utterance.pitch = 0.8;
+                        break;
+                    case 'neutral':
+                    default:
+                        utterance.pitch = 1.0;
+                        break;
+                }
+
+                if (text.includes('www') || text.includes('ｗｗｗ')) {
+                    utterance.rate *= 1.3;
+                }
+                if (text.includes('？') || text.includes('?')) {
+                    utterance.rate *= 0.9;
+                    utterance.pitch *= 1.1;
+                }
+
+                utterance.onend = () => {
+                    if (this.isReading) {
+                        this.currentIndex++;
+                        setTimeout(() => this.readCurrentComment(), 500);
+                    }
+                };
+
+                utterance.onerror = (event) => {
+                    if (event.error === 'interrupted' || event.error === 'canceled') return;
+                    console.error('Speech synthesis error', event);
+                    if (this.isReading) {
+                        this.currentIndex++;
+                        this.readCurrentComment();
+                    }
+                };
+
+                this.synth.speak(utterance);
+            }
+
+            // Generate a consistent pitch (0.7 ~ 1.4) based on author string
+            getPitchForAuthor(author) {
+                if (!author) return 1.0;
+                let hash = 0;
+                for (let i = 0; i < author.length; i++) {
+                    hash = author.charCodeAt(i) + ((hash << 5) - hash);
+                }
+                // Map hash to 0.0 - 1.0
+                const normalized = (Math.abs(hash) % 100) / 100;
+                // Map to 0.7 - 1.4
+                return 0.7 + (normalized * 0.7);
+            }
+
+
+
+            // --- Voicevox Logic ---
+
+
+            stopReading() {
+                this.isReading = false;
+
+                // Stop Browser TTS
+                if (this.synth.speaking) {
+                    this.synth.cancel();
+                }
+
+                // Stop Audio Player (Voicevox)
+                if (this.currentAudio) {
+                    this.currentAudio.pause();
+                    this.currentAudio = null;
+                }
+                this.isPlayingAudio = false;
+
+                if (this.currentUtterance) {
+                    this.currentUtterance.onend = null;
+                }
+
+                // ハイライトを削除
+                document.querySelectorAll('.comment-item').forEach(item => {
+                    item.classList.remove('active');
+                });
+
+                document.getElementById('playBtn').disabled = false;
+                document.getElementById('stopBtn').disabled = true;
+            }
+
+            // --- Translation Logic ---
+            async translateAllComments() {
+                if (!this.comments || this.comments.length === 0) {
+                    alert('翻訳するコメントがありません');
+                    return;
+                }
+
+                if (!confirm('全てのコメントを日本語に翻訳しますか？\n(コメント数によっては時間がかかります)')) return;
+
+                this.showLoading(true);
+                document.getElementById('loadingDiv').innerText = '翻訳中... AIが頑張っています 🤖';
+
+                try {
+                    // Chunk comments
+                    const DELIMITER = " ||| ";
+                    // Reduced to 500 to prevent Google API 400 Error (URL length)
+                    const MAX_CHUNK_SIZE = 500;
+
+                    let chunks = [];
+                    let currentChunk = [];
+                    let currentLength = 0;
+
+                    this.comments.forEach((comment) => {
+                        // Estimate encoded length (roughly 3x for JP chars)
+                        // Safe bet is to use strict length check if possible, or conservative char count.
+                        // encodeURIComponent can expand significantly. 
+                        const textLen = encodeURIComponent(comment.text).length;
+
+                        // Check if SINGLE comment is too big?
+                        if (textLen > MAX_CHUNK_SIZE) {
+                            // If a single comment is massive, we might just have to skip it or truncate it 
+                            // to avoid braking the batch. Or send it alone?
+                            // For simplicity, let's treat it as a chunk.
+                        }
+
+                        if (currentLength + textLen + DELIMITER.length > MAX_CHUNK_SIZE) {
+                            chunks.push(currentChunk.join(DELIMITER));
+                            currentChunk = [];
+                            currentLength = 0;
+                        }
+                        currentChunk.push(comment.text);
+                        currentLength += textLen + DELIMITER.length;
+                    });
+                    if (currentChunk.length > 0) {
+                        chunks.push(currentChunk.join(DELIMITER));
+                    }
+
+                    console.log(`Translation: Processing ${chunks.length} chunks...`);
+
+                    let translatedTexts = [];
+                    const WorkerUrl = 'https://youtube-comment-reader-worker.ngcnj175.workers.dev';
+
+                    for (let i = 0; i < chunks.length; i++) {
+                        document.getElementById('loadingDiv').innerText = `翻訳中... (${i + 1}/${chunks.length})`;
+
+                        const response = await fetch(WorkerUrl, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                mode: 'translate',
+                                text: chunks[i]
+                            })
+                        });
+
+                        if (!response.ok) {
+                            const errText = await response.text();
+                            console.error('Worker Translation Error:', errText);
+                            throw new Error(`Translation failed (${response.status}): ${errText}`);
+                        }
+                        const data = await response.json();
+
+                        const parts = data.translated_text.split(DELIMITER.trim());
+                        translatedTexts = translatedTexts.concat(parts);
+
+                        // wait a bit to be nice to the API
+                        await new Promise(r => setTimeout(r, 500));
+                    }
+
+                    // Update
+                    this.comments.forEach((comment, index) => {
+                        if (translatedTexts[index]) {
+                            comment.text = translatedTexts[index];
+                        }
+                    });
+
+                    this.displayComments();
+                    this.showStatus('翻訳が完了しました！');
+
+                } catch (e) {
+                    console.error(e);
+                    alert('翻訳に失敗しました: ' + e.message);
+                } finally {
+                    this.showLoading(false);
+                }
+            }
+
+            showLoading(show) {
+                document.getElementById('loadingDiv').style.display = show ? 'block' : 'none';
+            }
+
+            showError(message) {
+                const statusDiv = document.getElementById('statusDiv');
+                statusDiv.innerHTML = `< div class="error" >❌ ${message}</div > `;
+                setTimeout(() => this.clearStatus(), 5000);
+            }
+
+            showStatus(message) {
+                const statusDiv = document.getElementById('statusDiv');
+                statusDiv.innerHTML = `< div class="status" >✅ ${message}</div > `;
+                setTimeout(() => this.clearStatus(), 3000);
+            }
+
+            showApiStatus(message) {
+                const statusDiv = document.getElementById('statusDiv');
+                statusDiv.innerHTML = `< div class="api-status" >⚠️ ${message}</div >`;
+            }
+
+            clearStatus() {
+                document.getElementById('statusDiv').innerHTML = '';
+            }
+        }
+
+        // アプリケーション初期化
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log('🚀 YouTubeコメント読み上げくんを起動しました');
+            new YouTubeCommentReader();
+        });
+
+        // ページ離脱時の音声停止
+        window.addEventListener('beforeunload', () => {
+            if (window.speechSynthesis) {
+                window.speechSynthesis.cancel();
+            }
+        });
+    </script>
+</body>
+
+</html>
