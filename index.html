@@ -41,6 +41,24 @@
             width: 100%;
         }
 
+        .btn-paste {
+            padding: 14px 20px;
+            border: none;
+            border-radius: 50px;
+            font-size: 16px;
+            cursor: pointer;
+            background: #ECEFF1;
+            color: var(--secondary-color);
+            font-weight: 700;
+            font-family: inherit;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+
+        .btn-paste:hover {
+            background: #CFD8DC;
+        }
+
         .url-input {
             flex-grow: 1;
             /* existing styles will apply */
@@ -322,6 +340,9 @@
         .comments-list {
             display: grid;
             gap: 15px;
+            max-height: 500px;
+            overflow-y: auto;
+            padding-right: 10px;
         }
 
         .comment-item {
@@ -449,8 +470,11 @@
         <div class="input-section">
             <div class="input-group">
                 <!-- Label removed for simpler look, using placeholder -->
-                <input type="text" id="videoUrl" class="url-input"
-                    placeholder="YouTubeのURLをここに貼り付け (例: https://youtu.be/...)">
+                <div class="url-input-container">
+                    <input type="text" id="videoUrl" class="url-input"
+                        placeholder="YouTubeのURLをここに貼り付け (例: https://youtu.be/...)">
+                    <button id="pasteBtn" class="btn-paste">📋 貼付け</button>
+                </div>
             </div>
 
             <div class="controls">
@@ -597,12 +621,21 @@
                 document.getElementById('stopBtn').addEventListener('click', () => this.stopReading());
                 document.getElementById('speedSlider').addEventListener('input', () => this.updateSpeedDisplay());
 
+                // 貼付けボタン: クリップボードから貼り付けて自動取得
+                document.getElementById('pasteBtn').addEventListener('click', async () => {
+                    try {
+                        const text = await navigator.clipboard.readText();
+                        document.getElementById('videoUrl').value = text;
+                        this.fetchComments(); // 自動でコメント取得
+                    } catch (err) {
+                        console.error('クリップボード読み取りエラー:', err);
+                        alert('クリップボードの読み取りに失敗しました。\nブラウザの権限設定を確認してください。');
+                    }
+                });
+
                 document.getElementById('sortOrder').addEventListener('change', (e) => {
                     this.sortOrder = e.target.value;
                     if (document.getElementById('videoUrl').value) {
-                        // Sort and refresh display if data exists
-                        // But usually we just re-display. The simplified logic calls fetch or sortAndDisplay.
-                        // Let's stick to safe simple re-sort.
                         this.sortAndDisplayComments();
                     }
                 });
@@ -823,6 +856,12 @@
                 return div.innerHTML;
             }
 
+            // 絵文字を除去するメソッド
+            removeEmoji(text) {
+                // 一般的な絵文字のUnicode範囲を除去
+                return text.replace(/[\u{1F300}-\u{1F9FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}\u{1F000}-\u{1F02F}\u{1F0A0}-\u{1F0FF}\u{1F100}-\u{1F64F}\u{1F680}-\u{1F6FF}\u{FE00}-\u{FE0F}\u{1FA00}-\u{1FAFF}]/gu, '');
+            }
+
             formatDate(isoString) {
                 if (!isoString) return '';
                 const date = new Date(isoString);
@@ -875,7 +914,8 @@
                 }
 
                 const comment = this.comments[this.currentIndex];
-                const text = comment.text;
+                // 絵文字を除去してから読み上げ
+                const text = this.removeEmoji(comment.text);
 
                 // Browser TTS
                 const utterance = new SpeechSynthesisUtterance(text);
