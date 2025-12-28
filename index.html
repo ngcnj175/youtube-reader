@@ -10,32 +10,32 @@
     <style>
         :root {
             --bg-gradient: linear-gradient(135deg, #ffecd2 0%, #fcb69f 25%, #ee9ca7 50%, #ffdde1 75%, #a1c4fd 100%);
-            --card-bg: rgba(255, 255, 255, 0.65);
+            --card-bg: rgba(255, 255, 255, 0.45);
             --text-color: #333;
             --accent-color: #ff6b9d;
-            --player-bg: rgba(255, 255, 255, 0.7);
+            --player-bg: rgba(255, 255, 255, 0.5);
             --player-icon: #555;
-            --settings-bg: rgba(255, 255, 255, 0.85);
+            --settings-bg: rgba(255, 255, 255, 0.7);
         }
 
         [data-theme="dark"] {
             --bg-gradient: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
-            --card-bg: rgba(30, 30, 50, 0.7);
+            --card-bg: rgba(30, 30, 50, 0.5);
             --text-color: #eee;
             --accent-color: #ff6b9d;
-            --player-bg: rgba(30, 30, 50, 0.7);
+            --player-bg: rgba(30, 30, 50, 0.5);
             --player-icon: #fff;
-            --settings-bg: rgba(20, 20, 35, 0.85);
+            --settings-bg: rgba(20, 20, 35, 0.7);
         }
 
         [data-theme="light"] {
             --bg-gradient: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-            --card-bg: rgba(255, 255, 255, 0.8);
+            --card-bg: rgba(255, 255, 255, 0.6);
             --text-color: #333;
             --accent-color: #ff6b9d;
-            --player-bg: rgba(255, 255, 255, 0.85);
+            --player-bg: rgba(255, 255, 255, 0.7);
             --player-icon: #555;
-            --settings-bg: rgba(255, 255, 255, 0.9);
+            --settings-bg: rgba(255, 255, 255, 0.8);
         }
 
         * {
@@ -68,7 +68,7 @@
         .url-input {
             width: 100%;
             padding: 16px 20px;
-            border: 1px solid rgba(255, 255, 255, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.4);
             border-radius: 25px;
             font-size: 14px;
             background: var(--card-bg);
@@ -82,7 +82,7 @@
         }
 
         .url-input::placeholder {
-            color: #888;
+            color: #777;
         }
 
         /* Video Title */
@@ -99,7 +99,7 @@
             background: var(--card-bg);
             backdrop-filter: blur(20px);
             -webkit-backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.4);
             border-radius: 15px;
             padding: 12px 20px;
             overflow: hidden;
@@ -142,7 +142,7 @@
             background: var(--card-bg);
             backdrop-filter: blur(20px);
             -webkit-backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.4);
             border-radius: 15px;
             padding: 15px;
             margin-bottom: 10px;
@@ -158,7 +158,7 @@
         }
 
         .comment-item.active {
-            background: rgba(255, 107, 157, 0.25);
+            background: rgba(255, 107, 157, 0.3);
             border: 2px solid var(--accent-color);
         }
 
@@ -221,7 +221,7 @@
             background: var(--player-bg);
             backdrop-filter: blur(25px);
             -webkit-backdrop-filter: blur(25px);
-            border-top: 1px solid rgba(255, 255, 255, 0.3);
+            border-top: 1px solid rgba(255, 255, 255, 0.4);
             padding: 12px 15px;
             display: flex;
             justify-content: space-around;
@@ -299,7 +299,7 @@
             background: var(--settings-bg);
             backdrop-filter: blur(25px);
             -webkit-backdrop-filter: blur(25px);
-            border: 1px solid rgba(255, 255, 255, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.4);
             border-radius: 25px 25px 0 0;
             padding: 25px 20px;
             transform: translateY(100%);
@@ -420,14 +420,19 @@
         }
 
         .fullscreen-header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
             display: flex;
             justify-content: space-between;
             align-items: center;
             padding: 15px 20px;
+            z-index: 301;
         }
 
         .fullscreen-title {
-            font-size: 14px;
+            font-size: 13px;
             font-weight: 500;
             flex: 1;
             text-align: center;
@@ -439,40 +444,40 @@
         }
 
         .fullscreen-close {
-            width: 40px;
-            height: 40px;
+            width: 36px;
+            height: 36px;
             border: none;
             border-radius: 50%;
             background: rgba(255, 255, 255, 0.2);
             color: white;
-            font-size: 20px;
+            font-size: 18px;
             cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
         }
 
-        .fullscreen-content {
-            flex: 1;
+        .fullscreen-user-info {
+            position: fixed;
+            top: 70px;
+            left: 0;
+            right: 0;
             display: flex;
             flex-direction: column;
-            justify-content: center;
             align-items: center;
-            padding: 40px 30px;
-            text-align: center;
+            z-index: 301;
         }
 
         .fullscreen-avatar {
-            width: 80px;
-            height: 80px;
+            width: 60px;
+            height: 60px;
             border-radius: 50%;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            margin-bottom: 15px;
             display: flex;
             align-items: center;
             justify-content: center;
             color: white;
-            font-size: 32px;
+            font-size: 24px;
             font-weight: 700;
         }
 
@@ -484,25 +489,44 @@
         }
 
         .fullscreen-author {
-            font-size: 14px;
+            margin-top: 8px;
+            font-size: 13px;
             color: rgba(255, 255, 255, 0.7);
-            margin-bottom: 30px;
+        }
+
+        .fullscreen-content {
+            position: fixed;
+            top: 160px;
+            left: 0;
+            right: 0;
+            bottom: 120px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px 25px;
+            overflow: hidden;
         }
 
         .fullscreen-comment {
-            font-size: 26px;
             font-weight: 700;
-            line-height: 1.6;
-            max-width: 100%;
+            line-height: 1.5;
+            text-align: center;
             color: white;
+            width: 100%;
+            word-break: break-word;
         }
 
         .fullscreen-controls {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
             display: flex;
             justify-content: center;
             align-items: center;
             gap: 30px;
-            padding: 30px;
+            padding: 25px;
+            z-index: 301;
         }
 
         .fullscreen-btn {
@@ -570,7 +594,7 @@
             background: var(--card-bg);
             backdrop-filter: blur(25px);
             -webkit-backdrop-filter: blur(25px);
-            border: 1px solid rgba(255, 255, 255, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.4);
             border-radius: 15px;
             padding: 15px 25px;
             box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
@@ -648,7 +672,7 @@
         <button class="player-btn" id="translateBtn" title="翻訳">
             <svg viewBox="0 0 24 24">
                 <path
-                    d="M12.87 15.07l-2.54-2.51.03-.03c1.74-1.94 2.98-4.17 3.71-6.53H17V4h-7V2H8v2H1v1.99h11.17C11.5 7.92 10.44 9.75 9 11.35 8.07 10.32 7.3 9.19 6.69 8h-2c.73 1.63 1.73 3.17 2.98 4.56l-5.09 5.02L4 19l5-5 3.11 3.11.76-2.04zM18.5 10h-2L12 22h2l1.12-3h4.75L21 22h2l-4.5-12zm-2.62 7l1.62-4.33L19.12 17h-3.24z" />
+                    d="M12.65 15.67c.14-.36.05-.77-.23-1.05l-2.09-2.06.03-.03A17.52 17.52 0 0014.07 6H17V4h-7V2H8v2H1v2h11.17C11.5 7.92 10.44 9.75 9 11.35 8.07 10.32 7.3 9.19 6.69 8h-2c.73 1.63 1.73 3.17 2.98 4.56l-5.09 5.02L4 19l5-5 3.11 3.11.54-1.44zm4.35-5.67h-2L11 22h2l1.12-3h4.75L20 22h2l-5-12zm-2.62 7l1.62-4.33L17.62 17h-3.24z" />
             </svg>
         </button>
         <button class="player-btn" id="prevBtn" title="前へ">
@@ -674,7 +698,7 @@
         <button class="player-btn" id="speedBtn" title="速度">
             <svg viewBox="0 0 24 24">
                 <path
-                    d="M20.38 8.57l-1.23 1.85a8 8 0 01-.22 7.58H5.07A8 8 0 0115.58 6.85l1.85-1.23A10 10 0 003 12a10 10 0 0020 0c0-1.22-.22-2.4-.62-3.43zM10.59 15.41a2 2 0 010-2.83l6.36-6.36 1.42 1.42-6.36 6.36a2 2 0 01-2.83 0z" />
+                    d="M10 8v8l6-4-6-4zm11-5H3c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h18c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H3V5h18v14z" />
             </svg>
         </button>
         <button class="player-btn" id="volumeBtn" title="音量">
@@ -747,11 +771,13 @@
         <div class="fullscreen-header">
             <button class="fullscreen-close" id="fullscreenClose">✕</button>
             <div class="fullscreen-title" id="fullscreenTitle"></div>
-            <div style="width: 40px;"></div>
+            <div style="width: 36px;"></div>
         </div>
-        <div class="fullscreen-content">
+        <div class="fullscreen-user-info">
             <div class="fullscreen-avatar" id="fullscreenAvatar"></div>
             <div class="fullscreen-author" id="fullscreenAuthor"></div>
+        </div>
+        <div class="fullscreen-content">
             <div class="fullscreen-comment" id="fullscreenComment"></div>
         </div>
         <div class="fullscreen-controls">
@@ -948,7 +974,29 @@
             updateFullscreenComment() {
                 if (this.currentIndex < 0 || this.currentIndex >= this.comments.length) return;
                 const comment = this.comments[this.currentIndex];
-                document.getElementById('fullscreenComment').textContent = '「' + comment.text + '」';
+
+                const commentEl = document.getElementById('fullscreenComment');
+                const text = '「' + comment.text + '」';
+                commentEl.textContent = text;
+
+                // Auto-scale font size based on text length
+                const textLength = text.length;
+                let fontSize;
+                if (textLength <= 30) {
+                    fontSize = 32;
+                } else if (textLength <= 60) {
+                    fontSize = 26;
+                } else if (textLength <= 100) {
+                    fontSize = 22;
+                } else if (textLength <= 150) {
+                    fontSize = 18;
+                } else if (textLength <= 200) {
+                    fontSize = 16;
+                } else {
+                    fontSize = 14;
+                }
+                commentEl.style.fontSize = fontSize + 'px';
+
                 document.getElementById('fullscreenAuthor').textContent = comment.author;
 
                 const avatar = document.getElementById('fullscreenAvatar');
