@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="ja">
-<!-- Version: 2.1.0 - Neumorphism UI Updates -->
+<!-- Version: 2.2.0 - Unified Player + Settings Panel -->
 
 <head>
     <meta charset="UTF-8">
@@ -183,29 +183,30 @@
             color: var(--text-color);
         }
 
-        /* Player Container - Fixed Bottom */
-        .player-container {
+        /* Unified Player Panel - Fixed Bottom */
+        .player-panel {
             position: fixed;
             bottom: 0;
             left: 0;
             right: 0;
-            z-index: 100;
-            transition: transform 0.3s ease;
-        }
-
-        .player-container.settings-open {
-            transform: translateY(-220px);
-        }
-
-        /* Player Bar - Raised Shadow */
-        .player-bar {
             background: var(--bg-color);
             border-radius: 25px 25px 0 0;
-            padding: 15px 25px 25px;
+            box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.1);
+            z-index: 100;
+            transition: transform 0.3s ease;
+            transform: translateY(0);
+        }
+
+        .player-panel.settings-open {
+            transform: translateY(0);
+        }
+
+        /* Player Controls */
+        .player-controls {
+            padding: 15px 25px 20px;
             display: flex;
             justify-content: space-around;
             align-items: center;
-            box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.1);
         }
 
         .player-btn {
@@ -239,6 +240,11 @@
                 inset -2px -2px 4px var(--shadow-light);
         }
 
+        .player-btn.active {
+            box-shadow: inset 2px 2px 4px var(--shadow-dark),
+                inset -2px -2px 4px var(--shadow-light);
+        }
+
         .player-btn.play-btn {
             width: 56px;
             height: 56px;
@@ -257,23 +263,17 @@
             background: #0055dd;
         }
 
-        /* Settings Panel - Slide Up */
-        .settings-panel {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            background: var(--bg-color);
-            border-radius: 25px 25px 0 0;
-            padding: 20px 20px 30px;
-            transform: translateY(100%);
-            transition: transform 0.3s ease;
-            z-index: 99;
-            box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.15);
+        /* Settings Section - Inside Player Panel */
+        .settings-section {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease, padding 0.3s ease;
+            padding: 0 20px;
         }
 
-        .player-container.settings-open+.settings-panel {
-            transform: translateY(0);
+        .player-panel.settings-open .settings-section {
+            max-height: 300px;
+            padding: 0 20px 20px;
         }
 
         .settings-item {
@@ -592,9 +592,10 @@
         </div>
     </div>
 
-    <!-- Player Container -->
-    <div class="player-container" id="playerContainer">
-        <div class="player-bar">
+    <!-- Unified Player Panel -->
+    <div class="player-panel" id="playerPanel">
+        <!-- Player Controls -->
+        <div class="player-controls">
             <button class="player-btn" id="settingsBtn" title="設定">
                 <svg viewBox="0 0 24 24">
                     <path
@@ -622,54 +623,54 @@
                 </svg>
             </button>
         </div>
-    </div>
 
-    <!-- Settings Panel -->
-    <div class="settings-panel" id="settingsPanel">
-        <div class="settings-item">
-            <span class="settings-label">コメント並び替え</span>
-            <select class="settings-select" id="sortOrder">
-                <option value="relevance">おすすめ順</option>
-                <option value="time">新しい順</option>
-                <option value="oldest">古い順</option>
-            </select>
-        </div>
-
-        <div class="settings-item">
-            <span class="settings-label">連続再生</span>
-            <label class="toggle-switch">
-                <input type="checkbox" id="continuousToggle" checked>
-                <span class="toggle-slider"></span>
-            </label>
-        </div>
-
-        <div class="settings-item">
-            <span class="settings-label">ナンバリング表示</span>
-            <label class="toggle-switch">
-                <input type="checkbox" id="numberingToggle" checked>
-                <span class="toggle-slider"></span>
-            </label>
-        </div>
-
-        <div class="settings-item">
-            <span class="settings-label">読み上げ速度</span>
-            <div class="settings-slider">
-                <input type="range" id="speedSlider" min="0.5" max="2" step="0.1" value="1">
-                <span class="settings-slider-value" id="speedValue">1.0x</span>
+        <!-- Settings Section -->
+        <div class="settings-section" id="settingsSection">
+            <div class="settings-item">
+                <span class="settings-label">コメント並び替え</span>
+                <select class="settings-select" id="sortOrder">
+                    <option value="relevance">おすすめ順</option>
+                    <option value="time">新しい順</option>
+                    <option value="oldest">古い順</option>
+                </select>
             </div>
-        </div>
 
-        <div class="settings-item">
-            <span class="settings-label">音量</span>
-            <div class="settings-slider">
-                <input type="range" id="volumeSlider" min="0" max="1" step="0.1" value="1">
-                <span class="settings-slider-value" id="volumeValue">100%</span>
+            <div class="settings-item">
+                <span class="settings-label">連続再生</span>
+                <label class="toggle-switch">
+                    <input type="checkbox" id="continuousToggle" checked>
+                    <span class="toggle-slider"></span>
+                </label>
             </div>
-        </div>
 
-        <div class="settings-item">
-            <span class="settings-label">全コメント翻訳</span>
-            <button class="settings-btn" id="translateBtn">日本語に翻訳</button>
+            <div class="settings-item">
+                <span class="settings-label">ナンバリング表示</span>
+                <label class="toggle-switch">
+                    <input type="checkbox" id="numberingToggle" checked>
+                    <span class="toggle-slider"></span>
+                </label>
+            </div>
+
+            <div class="settings-item">
+                <span class="settings-label">読み上げ速度</span>
+                <div class="settings-slider">
+                    <input type="range" id="speedSlider" min="0.5" max="2" step="0.1" value="1">
+                    <span class="settings-slider-value" id="speedValue">1.0x</span>
+                </div>
+            </div>
+
+            <div class="settings-item">
+                <span class="settings-label">音量</span>
+                <div class="settings-slider">
+                    <input type="range" id="volumeSlider" min="0" max="1" step="0.1" value="1">
+                    <span class="settings-slider-value" id="volumeValue">100%</span>
+                </div>
+            </div>
+
+            <div class="settings-item">
+                <span class="settings-label">全コメント翻訳</span>
+                <button class="settings-btn" id="translateBtn">日本語に翻訳</button>
+            </div>
         </div>
     </div>
 
@@ -716,7 +717,7 @@
     </div>
 
     <script>
-        // Version: 2.1.0 - Neumorphism UI Updates
+        // Version: 2.2.0 - Unified Player + Settings Panel
         class YouTubeCommentReader {
             constructor() {
                 this.comments = [];
@@ -747,7 +748,7 @@
                     speechSynthesis.onvoiceschanged = () => this.loadVoices();
                 }
 
-                console.log('🚀 YouTubeコメント読み上げ v2.1.0 を起動しました');
+                console.log('🚀 YouTubeコメント読み上げ v2.2.0 を起動しました');
             }
 
             loadVoices() {
@@ -820,15 +821,6 @@
                 document.getElementById('fsNextBtn').addEventListener('click', () => this.nextComment());
                 document.getElementById('fsVolumeBtn').addEventListener('click', () => this.toggleMute());
 
-                // Close settings on outside click
-                document.addEventListener('click', (e) => {
-                    if (this.settingsOpen &&
-                        !e.target.closest('#settingsBtn') &&
-                        !e.target.closest('#settingsPanel')) {
-                        this.toggleSettings();
-                    }
-                });
-
                 // Keyboard shortcuts
                 document.addEventListener('keydown', (e) => {
                     if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
@@ -851,7 +843,10 @@
 
             toggleSettings() {
                 this.settingsOpen = !this.settingsOpen;
-                document.getElementById('playerContainer').classList.toggle('settings-open', this.settingsOpen);
+                const panel = document.getElementById('playerPanel');
+                const btn = document.getElementById('settingsBtn');
+                panel.classList.toggle('settings-open', this.settingsOpen);
+                btn.classList.toggle('active', this.settingsOpen);
             }
 
             toggleMute() {
