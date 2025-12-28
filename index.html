@@ -142,47 +142,55 @@
         }
 
         .comment-item {
-            border-radius: 20px;
+            border-radius: 25px;
             padding: 15px 18px;
-            margin-bottom: 8px;
+            margin-bottom: 10px;
             display: flex;
             align-items: flex-start;
             gap: 12px;
             cursor: pointer;
             transition: all 0.2s;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08), 0 8px 25px rgba(0, 0, 0, 0.05);
         }
 
         .comment-item:hover {
             transform: scale(1.01);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12), 0 10px 30px rgba(0, 0, 0, 0.08);
         }
 
         .comment-item.active {
-            box-shadow: 0 0 0 3px var(--accent-color);
+            box-shadow: 0 0 0 3px var(--accent-color), 0 4px 15px rgba(0, 0, 0, 0.1);
         }
 
-        /* Pastel Colors */
+        /* Pastel Colors with Gradient Shadows */
         .comment-color-0 {
-            background: rgba(200, 230, 201, 0.8);
+            background: linear-gradient(135deg, rgba(200, 230, 201, 0.95) 0%, rgba(178, 223, 180, 0.9) 100%);
+            box-shadow: 0 4px 15px rgba(129, 199, 132, 0.25), 0 8px 25px rgba(0, 0, 0, 0.05);
         }
 
         .comment-color-1 {
-            background: rgba(178, 235, 242, 0.8);
+            background: linear-gradient(135deg, rgba(178, 235, 242, 0.95) 0%, rgba(128, 222, 234, 0.9) 100%);
+            box-shadow: 0 4px 15px rgba(77, 208, 225, 0.25), 0 8px 25px rgba(0, 0, 0, 0.05);
         }
 
         .comment-color-2 {
-            background: rgba(248, 187, 208, 0.8);
+            background: linear-gradient(135deg, rgba(248, 187, 208, 0.95) 0%, rgba(244, 143, 177, 0.9) 100%);
+            box-shadow: 0 4px 15px rgba(240, 98, 146, 0.25), 0 8px 25px rgba(0, 0, 0, 0.05);
         }
 
         .comment-color-3 {
-            background: rgba(225, 190, 231, 0.8);
+            background: linear-gradient(135deg, rgba(225, 190, 231, 0.95) 0%, rgba(206, 147, 216, 0.9) 100%);
+            box-shadow: 0 4px 15px rgba(186, 104, 200, 0.25), 0 8px 25px rgba(0, 0, 0, 0.05);
         }
 
         .comment-color-4 {
-            background: rgba(255, 245, 157, 0.8);
+            background: linear-gradient(135deg, rgba(255, 245, 157, 0.95) 0%, rgba(255, 235, 59, 0.85) 100%);
+            box-shadow: 0 4px 15px rgba(255, 235, 59, 0.3), 0 8px 25px rgba(0, 0, 0, 0.05);
         }
 
         .comment-color-5 {
-            background: rgba(255, 204, 188, 0.8);
+            background: linear-gradient(135deg, rgba(255, 204, 188, 0.95) 0%, rgba(255, 171, 145, 0.9) 100%);
+            box-shadow: 0 4px 15px rgba(255, 138, 101, 0.25), 0 8px 25px rgba(0, 0, 0, 0.05);
         }
 
         .comment-avatar {
