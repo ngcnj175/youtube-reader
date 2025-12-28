@@ -946,10 +946,22 @@
             }
 
             async fetchVideoTitle(videoId) {
+                console.log('📺 動画タイトルを取得中...');
+
+                // Show section immediately with placeholder
+                const titleEl = document.getElementById('videoTitle');
+                const section = document.getElementById('videoTitleSection');
+                titleEl.textContent = '読み込み中...';
+                section.classList.add('show');
+
                 try {
                     const response = await fetch(`${this.WORKER_URL}?videoId=${videoId}&mode=video`);
+                    console.log('📺 API応答:', response.status);
+
                     if (response.ok) {
                         const data = await response.json();
+                        console.log('📺 取得データ:', data);
+
                         if (data.items && data.items[0]) {
                             this.videoTitle = data.items[0].snippet.title;
                         } else {
@@ -959,15 +971,17 @@
                         this.videoTitle = 'YouTube動画';
                     }
                 } catch (e) {
+                    console.error('📺 タイトル取得エラー:', e);
                     this.videoTitle = 'YouTube動画';
                 }
 
-                const titleEl = document.getElementById('videoTitle');
+                // Update title
                 titleEl.textContent = this.videoTitle;
-                document.getElementById('videoTitleSection').classList.add('show');
+                titleEl.classList.remove('scroll');
+                console.log('📺 タイトル設定:', this.videoTitle);
 
+                // Check if scrolling is needed
                 setTimeout(() => {
-                    const section = document.getElementById('videoTitleSection');
                     if (titleEl.scrollWidth > section.clientWidth) {
                         titleEl.textContent = this.videoTitle + '　　　　' + this.videoTitle;
                         titleEl.classList.add('scroll');
