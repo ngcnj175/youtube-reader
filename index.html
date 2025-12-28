@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="ja">
-<!-- Version: 2.0.0 - Neumorphism UI -->
+<!-- Version: 2.1.0 - Neumorphism UI Updates -->
 
 <head>
     <meta charset="UTF-8">
@@ -31,7 +31,7 @@
             color: var(--text-color);
             min-height: 100vh;
             padding: 20px 15px;
-            padding-bottom: 200px;
+            padding-bottom: 120px;
         }
 
         .container {
@@ -106,34 +106,30 @@
         }
 
         .comments-list {
-            max-height: calc(100vh - 380px);
+            max-height: calc(100vh - 280px);
             overflow-y: auto;
             padding: 5px;
         }
 
-        /* Comment Card - Raised Shadow */
+        /* Comment Card - White Background */
         .comment-item {
-            background: var(--bg-color);
+            background: #f5f7fa;
             border-radius: 20px;
             padding: 15px;
-            margin-bottom: 15px;
+            margin-bottom: 12px;
             display: flex;
             gap: 12px;
             cursor: pointer;
             transition: all 0.2s;
-            box-shadow: 6px 6px 12px var(--shadow-dark),
-                -6px -6px 12px var(--shadow-light);
         }
 
         .comment-item:hover {
-            box-shadow: 8px 8px 16px var(--shadow-dark),
-                -8px -8px 16px var(--shadow-light);
+            background: #fff;
         }
 
         .comment-item.active {
             background: #fff;
-            box-shadow: 6px 6px 12px var(--shadow-dark),
-                -6px -6px 12px var(--shadow-light);
+            box-shadow: 0 0 0 2px var(--accent-color);
         }
 
         .comment-avatar {
@@ -187,17 +183,29 @@
             color: var(--text-color);
         }
 
+        /* Player Container - Fixed Bottom */
+        .player-container {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            z-index: 100;
+            transition: transform 0.3s ease;
+        }
+
+        .player-container.settings-open {
+            transform: translateY(-220px);
+        }
+
         /* Player Bar - Raised Shadow */
         .player-bar {
             background: var(--bg-color);
-            border-radius: 25px;
-            padding: 15px 25px;
+            border-radius: 25px 25px 0 0;
+            padding: 15px 25px 25px;
             display: flex;
             justify-content: space-around;
             align-items: center;
-            margin-bottom: 15px;
-            box-shadow: 8px 8px 16px var(--shadow-dark),
-                -8px -8px 16px var(--shadow-light);
+            box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.1);
         }
 
         .player-btn {
@@ -249,13 +257,23 @@
             background: #0055dd;
         }
 
-        /* Settings Panel - Raised Shadow */
+        /* Settings Panel - Slide Up */
         .settings-panel {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
             background: var(--bg-color);
-            border-radius: 25px;
-            padding: 20px;
-            box-shadow: 8px 8px 16px var(--shadow-dark),
-                -8px -8px 16px var(--shadow-light);
+            border-radius: 25px 25px 0 0;
+            padding: 20px 20px 30px;
+            transform: translateY(100%);
+            transition: transform 0.3s ease;
+            z-index: 99;
+            box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.15);
+        }
+
+        .player-container.settings-open+.settings-panel {
+            transform: translateY(0);
         }
 
         .settings-item {
@@ -398,44 +416,23 @@
         }
 
         .fullscreen-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 15px 20px;
+            padding: 20px;
+            text-align: center;
         }
 
         .fullscreen-title {
             font-size: 13px;
             font-weight: 500;
-            flex: 1;
-            text-align: center;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
-            padding: 0 10px;
-        }
-
-        .fullscreen-close {
-            width: 40px;
-            height: 40px;
-            border: none;
-            border-radius: 50%;
-            background: var(--bg-color);
-            color: var(--text-color);
-            font-size: 18px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 4px 4px 8px var(--shadow-dark),
-                -4px -4px 8px var(--shadow-light);
         }
 
         .fullscreen-user-info {
             display: flex;
             flex-direction: column;
             align-items: center;
-            padding: 20px;
+            padding: 30px 20px 20px;
         }
 
         .fullscreen-avatar {
@@ -488,13 +485,13 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            gap: 30px;
-            padding: 30px;
+            padding: 20px 25px 35px;
+            gap: 20px;
         }
 
         .fullscreen-btn {
-            width: 50px;
-            height: 50px;
+            width: 46px;
+            height: 46px;
             border: none;
             border-radius: 50%;
             background: var(--bg-color);
@@ -507,14 +504,14 @@
         }
 
         .fullscreen-btn svg {
-            width: 22px;
-            height: 22px;
+            width: 20px;
+            height: 20px;
             fill: #666;
         }
 
         .fullscreen-btn.play {
-            width: 70px;
-            height: 70px;
+            width: 65px;
+            height: 65px;
             background: var(--accent-color);
         }
 
@@ -522,6 +519,10 @@
             width: 28px;
             height: 28px;
             fill: white;
+        }
+
+        .fullscreen-btn.muted svg {
+            fill: #ccc;
         }
 
         /* Loading */
@@ -589,8 +590,10 @@
         <div class="comments-section" id="commentsSection">
             <div class="comments-list" id="commentsList"></div>
         </div>
+    </div>
 
-        <!-- Player Bar -->
+    <!-- Player Container -->
+    <div class="player-container" id="playerContainer">
         <div class="player-bar">
             <button class="player-btn" id="settingsBtn" title="設定">
                 <svg viewBox="0 0 24 24">
@@ -619,63 +622,61 @@
                 </svg>
             </button>
         </div>
+    </div>
 
-        <!-- Settings Panel -->
-        <div class="settings-panel" id="settingsPanel">
-            <div class="settings-item">
-                <span class="settings-label">コメント並び替え</span>
-                <select class="settings-select" id="sortOrder">
-                    <option value="relevance">おすすめ順</option>
-                    <option value="time">新しい順</option>
-                    <option value="oldest">古い順</option>
-                </select>
-            </div>
+    <!-- Settings Panel -->
+    <div class="settings-panel" id="settingsPanel">
+        <div class="settings-item">
+            <span class="settings-label">コメント並び替え</span>
+            <select class="settings-select" id="sortOrder">
+                <option value="relevance">おすすめ順</option>
+                <option value="time">新しい順</option>
+                <option value="oldest">古い順</option>
+            </select>
+        </div>
 
-            <div class="settings-item">
-                <span class="settings-label">連続再生</span>
-                <label class="toggle-switch">
-                    <input type="checkbox" id="continuousToggle" checked>
-                    <span class="toggle-slider"></span>
-                </label>
-            </div>
+        <div class="settings-item">
+            <span class="settings-label">連続再生</span>
+            <label class="toggle-switch">
+                <input type="checkbox" id="continuousToggle" checked>
+                <span class="toggle-slider"></span>
+            </label>
+        </div>
 
-            <div class="settings-item">
-                <span class="settings-label">ナンバリング表示</span>
-                <label class="toggle-switch">
-                    <input type="checkbox" id="numberingToggle" checked>
-                    <span class="toggle-slider"></span>
-                </label>
-            </div>
+        <div class="settings-item">
+            <span class="settings-label">ナンバリング表示</span>
+            <label class="toggle-switch">
+                <input type="checkbox" id="numberingToggle" checked>
+                <span class="toggle-slider"></span>
+            </label>
+        </div>
 
-            <div class="settings-item">
-                <span class="settings-label">読み上げ速度</span>
-                <div class="settings-slider">
-                    <input type="range" id="speedSlider" min="0.5" max="2" step="0.1" value="1">
-                    <span class="settings-slider-value" id="speedValue">1.0x</span>
-                </div>
+        <div class="settings-item">
+            <span class="settings-label">読み上げ速度</span>
+            <div class="settings-slider">
+                <input type="range" id="speedSlider" min="0.5" max="2" step="0.1" value="1">
+                <span class="settings-slider-value" id="speedValue">1.0x</span>
             </div>
+        </div>
 
-            <div class="settings-item">
-                <span class="settings-label">音量</span>
-                <div class="settings-slider">
-                    <input type="range" id="volumeSlider" min="0" max="1" step="0.1" value="1">
-                    <span class="settings-slider-value" id="volumeValue">100%</span>
-                </div>
+        <div class="settings-item">
+            <span class="settings-label">音量</span>
+            <div class="settings-slider">
+                <input type="range" id="volumeSlider" min="0" max="1" step="0.1" value="1">
+                <span class="settings-slider-value" id="volumeValue">100%</span>
             </div>
+        </div>
 
-            <div class="settings-item">
-                <span class="settings-label">全コメント翻訳</span>
-                <button class="settings-btn" id="translateBtn">日本語に翻訳</button>
-            </div>
+        <div class="settings-item">
+            <span class="settings-label">全コメント翻訳</span>
+            <button class="settings-btn" id="translateBtn">日本語に翻訳</button>
         </div>
     </div>
 
     <!-- Fullscreen Overlay -->
     <div class="fullscreen-overlay" id="fullscreenOverlay">
         <div class="fullscreen-header">
-            <button class="fullscreen-close" id="fullscreenClose">✕</button>
             <div class="fullscreen-title" id="fullscreenTitle"></div>
-            <div style="width: 40px;"></div>
         </div>
         <div class="fullscreen-user-info">
             <div class="fullscreen-avatar" id="fullscreenAvatar"></div>
@@ -685,26 +686,37 @@
             <div class="fullscreen-comment" id="fullscreenComment"></div>
         </div>
         <div class="fullscreen-controls">
-            <button class="fullscreen-btn" id="fsPrevBtn">
+            <button class="fullscreen-btn" id="fullscreenClose" title="閉じる">
+                <svg viewBox="0 0 24 24">
+                    <path d="M5 16h3v3h2v-5H5v2zm3-8H5v2h5V5H8v3zm6 11h2v-3h3v-2h-5v5zm2-11V5h-2v5h5V8h-3z" />
+                </svg>
+            </button>
+            <button class="fullscreen-btn" id="fsPrevBtn" title="前へ">
                 <svg viewBox="0 0 24 24">
                     <path d="M6 6h2v12H6zm3.5 6l8.5 6V6z" />
                 </svg>
             </button>
-            <button class="fullscreen-btn play" id="fsPlayBtn">
+            <button class="fullscreen-btn play" id="fsPlayBtn" title="再生/停止">
                 <svg viewBox="0 0 24 24" id="fsPlayIcon">
                     <path d="M8 5v14l11-7z" />
                 </svg>
             </button>
-            <button class="fullscreen-btn" id="fsNextBtn">
+            <button class="fullscreen-btn" id="fsNextBtn" title="次へ">
                 <svg viewBox="0 0 24 24">
                     <path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z" />
+                </svg>
+            </button>
+            <button class="fullscreen-btn" id="fsVolumeBtn" title="音量">
+                <svg viewBox="0 0 24 24" id="fsVolumeIcon">
+                    <path
+                        d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z" />
                 </svg>
             </button>
         </div>
     </div>
 
     <script>
-        // Version: 2.0.0 - Neumorphism UI
+        // Version: 2.1.0 - Neumorphism UI Updates
         class YouTubeCommentReader {
             constructor() {
                 this.comments = [];
@@ -713,6 +725,9 @@
                 this.synth = window.speechSynthesis;
                 this.currentUtterance = null;
                 this.videoTitle = '';
+                this.settingsOpen = false;
+                this.isMuted = false;
+                this.savedVolume = 1.0;
 
                 this.sortOrder = 'relevance';
                 this.continuousPlay = true;
@@ -732,7 +747,7 @@
                     speechSynthesis.onvoiceschanged = () => this.loadVoices();
                 }
 
-                console.log('🚀 YouTubeコメント読み上げ v2.0.0 を起動しました');
+                console.log('🚀 YouTubeコメント読み上げ v2.1.0 を起動しました');
             }
 
             loadVoices() {
@@ -756,6 +771,9 @@
                 document.getElementById('nextBtn').addEventListener('click', () => this.nextComment());
                 document.getElementById('fullscreenBtn').addEventListener('click', () => this.enterFullscreen());
                 document.getElementById('translateBtn').addEventListener('click', () => this.translateAllComments());
+
+                // Settings toggle
+                document.getElementById('settingsBtn').addEventListener('click', () => this.toggleSettings());
 
                 // Long press for prev button
                 document.getElementById('prevBtn').addEventListener('mousedown', () => {
@@ -791,6 +809,8 @@
                 document.getElementById('volumeSlider').addEventListener('input', (e) => {
                     this.speechVolume = parseFloat(e.target.value);
                     document.getElementById('volumeValue').textContent = Math.round(this.speechVolume * 100) + '%';
+                    this.isMuted = this.speechVolume === 0;
+                    this.updateVolumeIcon();
                 });
 
                 // Fullscreen controls
@@ -798,6 +818,16 @@
                 document.getElementById('fsPrevBtn').addEventListener('click', () => this.prevComment());
                 document.getElementById('fsPlayBtn').addEventListener('click', () => this.togglePlay());
                 document.getElementById('fsNextBtn').addEventListener('click', () => this.nextComment());
+                document.getElementById('fsVolumeBtn').addEventListener('click', () => this.toggleMute());
+
+                // Close settings on outside click
+                document.addEventListener('click', (e) => {
+                    if (this.settingsOpen &&
+                        !e.target.closest('#settingsBtn') &&
+                        !e.target.closest('#settingsPanel')) {
+                        this.toggleSettings();
+                    }
+                });
 
                 // Keyboard shortcuts
                 document.addEventListener('keydown', (e) => {
@@ -819,11 +849,43 @@
                 });
             }
 
+            toggleSettings() {
+                this.settingsOpen = !this.settingsOpen;
+                document.getElementById('playerContainer').classList.toggle('settings-open', this.settingsOpen);
+            }
+
+            toggleMute() {
+                if (this.isMuted) {
+                    this.speechVolume = this.savedVolume || 1.0;
+                    this.isMuted = false;
+                } else {
+                    this.savedVolume = this.speechVolume;
+                    this.speechVolume = 0;
+                    this.isMuted = true;
+                }
+                document.getElementById('volumeSlider').value = this.speechVolume;
+                document.getElementById('volumeValue').textContent = Math.round(this.speechVolume * 100) + '%';
+                this.updateVolumeIcon();
+            }
+
+            updateVolumeIcon() {
+                const btn = document.getElementById('fsVolumeBtn');
+                const icon = document.getElementById('fsVolumeIcon');
+                if (this.isMuted || this.speechVolume === 0) {
+                    btn.classList.add('muted');
+                    icon.innerHTML = '<path d="M16.5 12c0-1.77-1.02-3.29-2.5-4.03v2.21l2.45 2.45c.03-.2.05-.41.05-.63zm2.5 0c0 .94-.2 1.82-.54 2.64l1.51 1.51C20.63 14.91 21 13.5 21 12c0-4.28-2.99-7.86-7-8.77v2.06c2.89.86 5 3.54 5 6.71zM4.27 3L3 4.27 7.73 9H3v6h4l5 5v-6.73l4.25 4.25c-.67.52-1.42.93-2.25 1.18v2.06c1.38-.31 2.63-.95 3.69-1.81L19.73 21 21 19.73l-9-9L4.27 3zM12 4L9.91 6.09 12 8.18V4z"/>';
+                } else {
+                    btn.classList.remove('muted');
+                    icon.innerHTML = '<path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/>';
+                }
+            }
+
             enterFullscreen() {
                 if (this.comments.length === 0) return;
                 document.getElementById('fullscreenOverlay').classList.add('show');
                 document.getElementById('fullscreenTitle').textContent = this.videoTitle;
                 this.updateFullscreenComment();
+                this.updateVolumeIcon();
             }
 
             exitFullscreen() {
@@ -909,7 +971,6 @@
                 titleEl.textContent = this.videoTitle;
                 document.getElementById('videoTitleSection').classList.add('show');
 
-                // Check if text overflows and add scroll animation
                 setTimeout(() => {
                     const section = document.getElementById('videoTitleSection');
                     if (titleEl.scrollWidth > section.clientWidth) {
