@@ -34,6 +34,18 @@
             padding-bottom: 120px;
         }
 
+        /* Initial state - center URL input */
+        body.initial-state {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        body.initial-state .container {
+            width: 100%;
+        }
+
         .container {
             max-width: 500px;
             margin: 0 auto;
@@ -98,7 +110,9 @@
         /* Comments Section */
         .comments-section {
             display: none;
-            margin-bottom: 20px;
+            margin-bottom: 0;
+            padding-bottom: 100px;
+            /* Space for player bar */
         }
 
         .comments-section.show {
@@ -106,9 +120,10 @@
         }
 
         .comments-list {
-            max-height: calc(100vh - 280px);
+            max-height: calc(100vh - 180px);
             overflow-y: auto;
             padding: 5px;
+            padding-bottom: 20px;
         }
 
         /* Comment Card - White Background */
@@ -430,22 +445,24 @@
 
         .fullscreen-user-info {
             display: flex;
-            flex-direction: column;
+            flex-direction: row;
             align-items: center;
-            padding: 30px 20px 20px;
+            gap: 12px;
+            padding: 20px 25px 0;
         }
 
         .fullscreen-avatar {
-            width: 60px;
-            height: 60px;
+            width: 50px;
+            height: 50px;
             border-radius: 50%;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             display: flex;
             align-items: center;
             justify-content: center;
             color: white;
-            font-size: 24px;
+            font-size: 20px;
             font-weight: 700;
+            flex-shrink: 0;
             box-shadow: 4px 4px 8px var(--shadow-dark),
                 -4px -4px 8px var(--shadow-light);
         }
@@ -458,7 +475,6 @@
         }
 
         .fullscreen-author {
-            margin-top: 10px;
             font-size: 14px;
             color: var(--text-light);
         }
@@ -466,16 +482,16 @@
         .fullscreen-content {
             flex: 1;
             display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 20px 30px;
+            align-items: flex-start;
+            justify-content: flex-start;
+            padding: 20px 25px;
             overflow: hidden;
         }
 
         .fullscreen-comment {
             font-weight: 700;
-            line-height: 1.5;
-            text-align: center;
+            line-height: 1.6;
+            text-align: left;
             color: var(--text-color);
             width: 100%;
             word-break: break-word;
@@ -568,7 +584,7 @@
     </style>
 </head>
 
-<body>
+<body class="initial-state">
     <div class="container">
         <!-- URL Input -->
         <div class="url-section">
@@ -683,7 +699,7 @@
             <div class="fullscreen-avatar" id="fullscreenAvatar"></div>
             <div class="fullscreen-author" id="fullscreenAuthor"></div>
         </div>
-        <div class="fullscreen-content">
+        <div class="fullscreen-content" id="fullscreenContent">
             <div class="fullscreen-comment" id="fullscreenComment"></div>
         </div>
         <div class="fullscreen-controls">
@@ -892,11 +908,19 @@
                 const comment = this.comments[this.currentIndex];
 
                 const commentEl = document.getElementById('fullscreenComment');
+                const contentEl = document.getElementById('fullscreenContent');
                 commentEl.textContent = comment.text;
 
-                const len = comment.text.length;
-                let fontSize = len <= 30 ? 32 : len <= 60 ? 26 : len <= 100 ? 22 : len <= 150 ? 18 : len <= 200 ? 16 : 14;
+                // Auto-fit font size to container
+                const containerHeight = contentEl.clientHeight - 40; // padding
+                let fontSize = 28;
                 commentEl.style.fontSize = fontSize + 'px';
+
+                // Reduce font size until text fits
+                while (commentEl.scrollHeight > containerHeight && fontSize > 12) {
+                    fontSize -= 1;
+                    commentEl.style.fontSize = fontSize + 'px';
+                }
 
                 document.getElementById('fullscreenAuthor').textContent = comment.author;
 
@@ -1052,6 +1076,9 @@
             displayComments() {
                 const commentsList = document.getElementById('commentsList');
                 const commentsSection = document.getElementById('commentsSection');
+
+                // Remove initial centering state
+                document.body.classList.remove('initial-state');
 
                 commentsList.innerHTML = '';
 
