@@ -80,6 +80,7 @@
             margin-bottom: 20px;
             display: none;
             overflow: hidden;
+            text-align: center;
         }
 
         .video-title-section.show {
@@ -91,10 +92,15 @@
             font-weight: 700;
             white-space: nowrap;
             display: inline-block;
+            padding-left: 100%;
+        }
+
+        .video-title.no-scroll {
+            padding-left: 0;
         }
 
         .video-title.scroll {
-            animation: marquee 12s linear infinite;
+            animation: marquee 15s linear infinite;
         }
 
         @keyframes marquee {
@@ -103,7 +109,7 @@
             }
 
             100% {
-                transform: translateX(-50%);
+                transform: translateX(-100%);
             }
         }
 
@@ -235,6 +241,7 @@
             align-items: center;
             justify-content: center;
             transition: all 0.2s;
+            touch-action: manipulation;
             box-shadow: 4px 4px 8px var(--shadow-dark),
                 -4px -4px 8px var(--shadow-light);
         }
@@ -433,22 +440,30 @@
         .fullscreen-header {
             padding: 20px;
             text-align: center;
+            overflow: hidden;
+        }
+
+        .fullscreen-title-wrapper {
+            overflow: hidden;
         }
 
         .fullscreen-title {
             font-size: 13px;
             font-weight: 500;
             white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
+            display: inline-block;
+        }
+
+        .fullscreen-title.scroll {
+            padding-left: 100%;
+            animation: marquee 15s linear infinite;
         }
 
         .fullscreen-user-info {
             display: flex;
-            flex-direction: row;
+            flex-direction: column;
             align-items: center;
-            gap: 12px;
-            padding: 20px 25px 0;
+            padding: 20px 25px 10px;
         }
 
         .fullscreen-avatar {
@@ -475,6 +490,7 @@
         }
 
         .fullscreen-author {
+            margin-top: 8px;
             font-size: 14px;
             color: var(--text-light);
         }
@@ -484,7 +500,7 @@
             display: flex;
             align-items: flex-start;
             justify-content: flex-start;
-            padding: 20px 25px;
+            padding: 30px 25px 20px;
             overflow: hidden;
         }
 
@@ -515,6 +531,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
+            touch-action: manipulation;
             box-shadow: 4px 4px 8px var(--shadow-dark),
                 -4px -4px 8px var(--shadow-light);
         }
@@ -692,7 +709,7 @@
 
     <!-- Fullscreen Overlay -->
     <div class="fullscreen-overlay" id="fullscreenOverlay">
-        <div class="fullscreen-header">
+        <div class="fullscreen-header" id="fullscreenHeader">
             <div class="fullscreen-title" id="fullscreenTitle"></div>
         </div>
         <div class="fullscreen-user-info">
@@ -894,7 +911,19 @@
             enterFullscreen() {
                 if (this.comments.length === 0) return;
                 document.getElementById('fullscreenOverlay').classList.add('show');
-                document.getElementById('fullscreenTitle').textContent = this.videoTitle;
+
+                // Set title and check if scrolling is needed
+                const titleEl = document.getElementById('fullscreenTitle');
+                const header = document.getElementById('fullscreenHeader');
+                titleEl.textContent = this.videoTitle;
+                titleEl.classList.remove('scroll');
+
+                setTimeout(() => {
+                    if (titleEl.scrollWidth > header.clientWidth - 40) {
+                        titleEl.classList.add('scroll');
+                    }
+                }, 100);
+
                 this.updateFullscreenComment();
                 this.updateVolumeIcon();
             }
@@ -976,6 +1005,8 @@
                 const titleEl = document.getElementById('videoTitle');
                 const section = document.getElementById('videoTitleSection');
                 titleEl.textContent = '読み込み中...';
+                titleEl.classList.add('no-scroll');
+                titleEl.classList.remove('scroll');
                 section.classList.add('show');
 
                 try {
@@ -1001,14 +1032,15 @@
 
                 // Update title
                 titleEl.textContent = this.videoTitle;
-                titleEl.classList.remove('scroll');
                 console.log('📺 タイトル設定:', this.videoTitle);
 
                 // Check if scrolling is needed
                 setTimeout(() => {
+                    titleEl.classList.remove('no-scroll');
                     if (titleEl.scrollWidth > section.clientWidth) {
-                        titleEl.textContent = this.videoTitle + '　　　　' + this.videoTitle;
                         titleEl.classList.add('scroll');
+                    } else {
+                        titleEl.classList.add('no-scroll');
                     }
                 }, 100);
             }
