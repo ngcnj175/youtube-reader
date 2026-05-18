@@ -755,6 +755,14 @@
             </div>
 
             <div class="settings-item">
+                <span class="settings-label">自動スクロール</span>
+                <label class="toggle-switch">
+                    <input type="checkbox" id="autoScrollToggle" checked>
+                    <span class="toggle-slider"></span>
+                </label>
+            </div>
+
+            <div class="settings-item">
                 <span class="settings-label">連続再生</span>
                 <label class="toggle-switch">
                     <input type="checkbox" id="continuousToggle" checked>
@@ -852,6 +860,7 @@
                 this.sortOrder = 'relevance';
                 this.continuousPlay = true;
                 this.showNumbering = true;
+                this.autoScroll = true;
                 this.speechRate = 1.0;
                 this.speechVolume = 1.0;
 
@@ -923,6 +932,10 @@
                 document.getElementById('sortOrder').addEventListener('change', (e) => {
                     this.sortOrder = e.target.value;
                     if (this.comments.length > 0) this.fetchComments();
+                });
+
+                document.getElementById('autoScrollToggle').addEventListener('change', (e) => {
+                    this.autoScroll = e.target.checked;
                 });
 
                 document.getElementById('continuousToggle').addEventListener('change', (e) => {
@@ -1258,7 +1271,9 @@
                 const items = document.querySelectorAll('.comment-item');
                 if (items[index]) {
                     items[index].classList.add('active');
-                    items[index].scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    if (this.autoScroll) {
+                        items[index].scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    }
                 }
                 this.updateFullscreenComment();
             }
