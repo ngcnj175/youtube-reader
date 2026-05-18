@@ -2,7 +2,9 @@
   "permissions": {
     "allow": [
       "Bash(Get-ChildItem -Path . -Force)",
-      "Bash(Select-Object Name, BaseName, Extension)"
+      "Bash(Select-Object Name, BaseName, Extension)",
+      "Bash(Get-ChildItem -Path \"C:\\\\Users\\\\ngcnj\\\\OneDrive\\\\ドキュメント\\\\GitHub\\\\youtube-reader\" -Recurse -Force)",
+      "Bash(Select-Object -First 100)"
     ]
   }
 }

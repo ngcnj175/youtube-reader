@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="ja">
-<!-- Version: 2.2.0 - Unified Player + Settings Panel -->
+<!-- Version: 2.3.0 - Thread-based comment structure -->
 
 <head>
     <meta charset="UTF-8">
@@ -844,10 +844,14 @@
     </div>
 
     <script>
-        // Version: 2.2.0 - Unified Player + Settings Panel
+        // Version: 2.3.0 - Thread-based comment structure
+        const NORMAL_SPEECH_GAP = 500;
+        const THREAD_SPEECH_GAP = 50;
+
         class YouTubeCommentReader {
             constructor() {
-                this.comments = [];
+                this.threads = [];
+                this.speechQueue = [];
                 this.currentIndex = -1;
                 this.isReading = false;
                 this.synth = window.speechSynthesis;
@@ -876,7 +880,7 @@
                     speechSynthesis.onvoiceschanged = () => this.loadVoices();
                 }
 
-                console.log('🚀 YouTubeコメント読み上げ v2.2.0 を起動しました');
+                console.log('🚀 YouTubeコメント読み上げ v2.3.0 を起動しました');
             }
 
             loadVoices() {
@@ -931,7 +935,7 @@
                 // Settings
                 document.getElementById('sortOrder').addEventListener('change', (e) => {
                     this.sortOrder = e.target.value;
-                    if (this.comments.length > 0) this.fetchComments();
+                    if (this.threads.length > 0) this.fetchComments();
                 });
 
                 document.getElementById('autoScrollToggle').addEventListener('change', (e) => {
@@ -944,7 +948,8 @@
 
                 document.getElementById('numberingToggle').addEventListener('change', (e) => {
                     this.showNumbering = e.target.checked;
-                    this.displayComments();
+                    this.renderThreads();
+                    this.highlightComment(this.currentIndex);
                 });
 
                 document.getElementById('speedSlider').addEventListener('input', (e) => {
@@ -1021,7 +1026,7 @@
             }
 
             enterFullscreen() {
-                if (this.comments.length === 0) return;
+                if (this.speechQueue.length === 0) return;
                 document.getElementById('fullscreenOverlay').classList.add('show');
 
                 // Set title and check if scrolling is needed
@@ -1045,12 +1050,12 @@
             }
 
             updateFullscreenComment() {
-                if (this.currentIndex < 0 || this.currentIndex >= this.comments.length) return;
-                const comment = this.comments[this.currentIndex];
+                if (this.currentIndex < 0 || this.currentIndex >= this.speechQueue.length) return;
+                const entry = this.speechQueue[this.currentIndex];
 
                 const commentEl = document.getElementById('fullscreenComment');
                 const contentEl = document.getElementById('fullscreenContent');
-                commentEl.textContent = comment.text;
+                commentEl.textContent = entry.text;
 
                 // Auto-fit font size to container
                 const containerHeight = contentEl.clientHeight - 40; // padding
@@ -1063,14 +1068,48 @@
                     commentEl.style.fontSize = fontSize + 'px';
                 }
 
-                document.getElementById('fullscreenAuthor').textContent = comment.author;
+                document.getElementById('fullscreenAuthor').textContent = entry.author;
 
                 const avatar = document.getElementById('fullscreenAvatar');
-                if (comment.authorProfileImageUrl) {
-                    avatar.innerHTML = `<img src="${comment.authorProfileImageUrl}" alt="">`;
+                if (entry.authorProfileImageUrl) {
+                    avatar.innerHTML = `<img src="${entry.authorProfileImageUrl}" alt="">`;
                 } else {
-                    avatar.innerHTML = comment.author.charAt(0).toUpperCase();
+                    avatar.innerHTML = entry.author.charAt(0).toUpperCase();
                 }
+            }
+
+            normalizeComments(items) {
+                return items.map(item => {
+                    const topSnippet = item.snippet.topLevelComment.snippet;
+                    const parent = {
+                        author: topSnippet.authorDisplayName,
+                        authorProfileImageUrl: topSnippet.authorProfileImageUrl,
+                        text: topSnippet.textDisplay.replace(/<[^>]*>/g, ''),
+                        publishedAt: topSnippet.publishedAt,
+                        isReply: false
+                    };
+
+                    const replies = (item.replies && item.replies.comments || []).map(reply => ({
+                        author: reply.snippet.authorDisplayName,
+                        authorProfileImageUrl: reply.snippet.authorProfileImageUrl,
+                        text: reply.snippet.textDisplay.replace(/<[^>]*>/g, ''),
+                        publishedAt: reply.snippet.publishedAt,
+                        isReply: true
+                    }));
+
+                    return { id: item.id, parent, replies };
+                });
+            }
+
+            buildSpeechQueue(threads) {
+                const queue = [];
+                threads.forEach(thread => {
+                    const all = [thread.parent, ...thread.replies];
+                    all.forEach((comment, i) => {
+                        queue.push({ ...comment, isLastInThread: i === all.length - 1 });
+                    });
+                });
+                return queue;
             }
 
             extractVideoId(url) {
@@ -1094,12 +1133,13 @@
 
                 try {
                     await this.fetchVideoTitle(videoId);
-                    const comments = await this.fetchAllComments(videoId);
-                    this.comments = comments;
-                    this.displayComments();
+                    const threads = await this.fetchAllComments(videoId);
+                    this.threads = threads;
+                    this.speechQueue = this.buildSpeechQueue(threads);
+                    this.renderThreads();
                     this.showLoading(false);
 
-                    if (this.comments.length > 0) {
+                    if (this.speechQueue.length > 0) {
                         this.currentIndex = 0;
                         this.highlightComment(0);
                     }
@@ -1158,33 +1198,29 @@
             }
 
             async fetchAllComments(videoId) {
-                let allComments = [];
+                let allThreads = [];
                 let nextPageToken = '';
                 let fetchCount = 0;
                 const maxFetches = 10;
-                let apiSortOrder = this.sortOrder === 'oldest' ? 'time' : this.sortOrder;
+                const apiSortOrder = this.sortOrder === 'oldest' ? 'time' : this.sortOrder;
 
                 try {
                     do {
                         const data = await this.fetchPage(videoId, apiSortOrder, nextPageToken);
                         if (!data.items) break;
 
-                        const extracted = data.items.map(item => ({
-                            author: item.snippet.topLevelComment.snippet.authorDisplayName,
-                            authorProfileImageUrl: item.snippet.topLevelComment.snippet.authorProfileImageUrl,
-                            text: item.snippet.topLevelComment.snippet.textDisplay.replace(/<[^>]*>/g, ''),
-                            publishedAt: item.snippet.topLevelComment.snippet.publishedAt
-                        }));
-
-                        allComments = allComments.concat(extracted);
+                        const threads = this.normalizeComments(data.items);
+                        allThreads = allThreads.concat(threads);
                         nextPageToken = data.nextPageToken;
                         fetchCount++;
-                        document.getElementById('loadingText').textContent = `コメントを取得中... (${allComments.length}件)`;
 
-                    } while (nextPageToken && allComments.length < this.MAX_COMMENTS && fetchCount < maxFetches);
+                        const totalComments = allThreads.reduce((sum, t) => sum + 1 + t.replies.length, 0);
+                        document.getElementById('loadingText').textContent = `コメントを取得中... (${totalComments}件)`;
 
-                    if (this.sortOrder === 'oldest') allComments.reverse();
-                    return allComments;
+                    } while (nextPageToken && allThreads.length < this.MAX_COMMENTS && fetchCount < maxFetches);
+
+                    if (this.sortOrder === 'oldest') allThreads.reverse();
+                    return allThreads;
                 } catch (error) {
                     throw error;
                 }
@@ -1198,54 +1234,58 @@
             }
 
             runDemoMode() {
-                const sampleComments = [
-                    { author: '太郎', text: 'この動画すごく面白いです！', authorProfileImageUrl: null, publishedAt: '2024-01-15' },
-                    { author: '花子', text: 'ありがとうございます、勉強になりました。', authorProfileImageUrl: null, publishedAt: '2024-01-14' },
-                    { author: 'ユーザー123', text: 'わかりやすい説明ですね～', authorProfileImageUrl: null, publishedAt: '2024-01-13' },
-                    { author: '山田', text: '素晴らしい内容でした！', authorProfileImageUrl: null, publishedAt: '2024-01-12' },
-                    { author: 'コメンター', text: 'また見に来ます。', authorProfileImageUrl: null, publishedAt: '2024-01-11' },
+                const sampleData = [
+                    { author: '太郎', text: 'この動画すごく面白いです！', authorProfileImageUrl: null, publishedAt: '2024-01-15', replies: [] },
+                    { author: '花子', text: 'ありがとうございます、勉強になりました。', authorProfileImageUrl: null, publishedAt: '2024-01-14', replies: [
+                        { author: 'ユーザー123', text: 'わかりやすい説明ですね～', authorProfileImageUrl: null, publishedAt: '2024-01-14' }
+                    ]},
+                    { author: '山田', text: '素晴らしい内容でした！', authorProfileImageUrl: null, publishedAt: '2024-01-12', replies: [] },
+                    { author: 'コメンター', text: 'また見に来ます。', authorProfileImageUrl: null, publishedAt: '2024-01-11', replies: [] },
                 ];
 
                 this.videoTitle = 'デモ動画';
                 document.getElementById('videoTitle').textContent = this.videoTitle;
                 document.getElementById('videoTitleSection').classList.add('show');
 
-                this.comments = sampleComments;
-                this.displayComments();
+                this.threads = sampleData.map((c, i) => ({
+                    id: `demo-${i}`,
+                    parent: { author: c.author, authorProfileImageUrl: c.authorProfileImageUrl, text: c.text, publishedAt: c.publishedAt, isReply: false },
+                    replies: c.replies.map(r => ({ ...r, isReply: true }))
+                }));
+                this.speechQueue = this.buildSpeechQueue(this.threads);
+                this.renderThreads();
                 this.showLoading(false);
                 this.currentIndex = 0;
                 this.highlightComment(0);
             }
 
-            displayComments() {
+            renderThreads() {
                 const commentsList = document.getElementById('commentsList');
                 const commentsSection = document.getElementById('commentsSection');
 
-                // Remove initial centering state
                 document.body.classList.remove('initial-state');
-
                 commentsList.innerHTML = '';
 
-                this.comments.forEach((comment, index) => {
+                this.speechQueue.forEach((entry, index) => {
                     const commentDiv = document.createElement('div');
                     commentDiv.className = 'comment-item';
                     commentDiv.dataset.index = index;
 
                     const numberStr = this.showNumbering ? `#${index + 1} ` : '';
-                    const dateStr = comment.publishedAt ? new Date(comment.publishedAt).toLocaleDateString('ja-JP') : '';
+                    const dateStr = entry.publishedAt ? new Date(entry.publishedAt).toLocaleDateString('ja-JP') : '';
 
-                    const avatarContent = comment.authorProfileImageUrl
-                        ? `<img src="${comment.authorProfileImageUrl}" alt="">`
-                        : comment.author.charAt(0).toUpperCase();
+                    const avatarContent = entry.authorProfileImageUrl
+                        ? `<img src="${entry.authorProfileImageUrl}" alt="">`
+                        : entry.author.charAt(0).toUpperCase();
 
                     commentDiv.innerHTML = `
                         <div class="comment-avatar">${avatarContent}</div>
                         <div class="comment-content">
                             <div class="comment-header">
-                                <span class="comment-author">${numberStr}${this.escapeHtml(comment.author)}</span>
+                                <span class="comment-author">${numberStr}${this.escapeHtml(entry.author)}</span>
                                 <span class="comment-date">${dateStr}</span>
                             </div>
-                            <div class="comment-text">${this.escapeHtml(comment.text)}</div>
+                            <div class="comment-text">${this.escapeHtml(entry.text)}</div>
                         </div>
                     `;
 
@@ -1296,15 +1336,15 @@
             }
 
             readCurrentComment() {
-                if (this.currentIndex >= this.comments.length || !this.isReading) {
+                if (this.currentIndex >= this.speechQueue.length || !this.isReading) {
                     this.stopReading();
                     return;
                 }
 
                 this.highlightComment(this.currentIndex);
 
-                const comment = this.comments[this.currentIndex];
-                const text = this.removeEmoji(comment.text);
+                const entry = this.speechQueue[this.currentIndex];
+                const text = this.removeEmoji(entry.text);
 
                 const utterance = new SpeechSynthesisUtterance(text);
                 this.currentUtterance = utterance;
@@ -1318,10 +1358,12 @@
                 const pitches = [0.7, 0.9, 1.1, 1.3];
                 utterance.pitch = pitches[Math.floor(Math.random() * pitches.length)];
 
+                const gap = entry.isLastInThread ? NORMAL_SPEECH_GAP : THREAD_SPEECH_GAP;
+
                 utterance.onend = () => {
                     if (this.isReading && this.continuousPlay) {
                         this.currentIndex++;
-                        setTimeout(() => this.readCurrentComment(), 500);
+                        setTimeout(() => this.readCurrentComment(), gap);
                     } else if (this.isReading) {
                         this.stopReading();
                     }
@@ -1364,7 +1406,7 @@
             }
 
             nextComment() {
-                if (this.currentIndex < this.comments.length - 1) {
+                if (this.currentIndex < this.speechQueue.length - 1) {
                     this.currentIndex++;
                     if (this.isReading) {
                         this.synth.cancel();
@@ -1386,7 +1428,7 @@
             }
 
             async translateAllComments() {
-                if (!this.comments || this.comments.length === 0) {
+                if (!this.speechQueue || this.speechQueue.length === 0) {
                     alert('翻訳するコメントがありません');
                     return;
                 }
@@ -1402,14 +1444,14 @@
                     let currentChunk = [];
                     let currentLength = 0;
 
-                    this.comments.forEach((comment) => {
-                        const textLen = encodeURIComponent(comment.text).length;
+                    this.speechQueue.forEach((entry) => {
+                        const textLen = encodeURIComponent(entry.text).length;
                         if (currentLength + textLen + DELIMITER.length > MAX_CHUNK_SIZE) {
                             chunks.push(currentChunk.join(DELIMITER));
                             currentChunk = [];
                             currentLength = 0;
                         }
-                        currentChunk.push(comment.text);
+                        currentChunk.push(entry.text);
                         currentLength += textLen + DELIMITER.length;
                     });
                     if (currentChunk.length > 0) chunks.push(currentChunk.join(DELIMITER));
@@ -1430,11 +1472,11 @@
                         await new Promise(r => setTimeout(r, 500));
                     }
 
-                    this.comments.forEach((comment, index) => {
-                        if (translatedTexts[index]) comment.text = translatedTexts[index];
+                    this.speechQueue.forEach((entry, index) => {
+                        if (translatedTexts[index]) entry.text = translatedTexts[index];
                     });
 
-                    this.displayComments();
+                    this.renderThreads();
                     this.highlightComment(this.currentIndex);
                 } catch (e) {
                     console.error(e);
