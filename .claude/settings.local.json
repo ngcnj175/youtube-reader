@@ -4,7 +4,11 @@
       "Bash(Get-ChildItem -Path . -Force)",
       "Bash(Select-Object Name, BaseName, Extension)",
       "Bash(Get-ChildItem -Path \"C:\\\\Users\\\\ngcnj\\\\OneDrive\\\\ドキュメント\\\\GitHub\\\\youtube-reader\" -Recurse -Force)",
-      "Bash(Select-Object -First 100)"
+      "Bash(Select-Object -First 100)",
+      "Bash(curl -sI https://ngcnj175.github.io/youtube-reader/)",
+      "Bash(git add *)",
+      "Bash(git commit -m ' *)",
+      "Bash(git push *)"
     ]
   }
 }
